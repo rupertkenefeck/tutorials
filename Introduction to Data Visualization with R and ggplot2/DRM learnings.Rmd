@@ -1,0 +1,152 @@
+---
+title: "DRC & ggplot learnings"
+author: "Rupert"
+date: "24 February 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+##Load Library
+```{r}
+
+
+library(drc)
+head(ryegrass)
+summary(ryegrass)
+dim(ryegrass)   #very simple data
+
+
+```
+
+##revising ggplot
+
+```{r}
+ggplot(ryegrass, aes(x = conc, y= rootl) ) +
+  scale_x_log10() +
+         theme_bw() +
+   geom_point() +
+  #scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  #scale_color_brewer(palette="Dark2") +
+ 
+  #scale_fill_brewer(palette="Paired") +
+  #facet_grid(~ Sex ~ Pclass) +
+  
+  #geom_boxplot(width = 0.2, fill = "slateblue") +
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=0.2)
+  #geom_jitter(col = "black", pch = 18, width = 0.15) +
+  #stat_summary(fun.y=median, geom="point", size=2, color="red") +
+  
+  labs(y = "Root Length",
+       x = "Concentration ()",
+       title = "Ryegrass Experiemnt")
+         
+         
+         
+         
+         
+```
+
+##Dose Response Calculation (4 parameter log logistic model)
+
+```{r}
+ryegrass.LL4 <- drm(rootl ~ conc, data=ryegrass, fct = LL.4())
+
+plot(ryegrass.LL4, broken = TRUE)
+
+
+
+```
+
+
+
+```{r}
+ryegrass.LL4 <- drm(rootl ~ conc, data=ryegrass, fct = LL.4())
+
+plot(ryegrass.LL4, broken = TRUE, type = "all")
+
+
+```
+
+###plotting residuals to check model
+```{r}
+qqnorm(resid(ryegrass.LL4))
+```
+
+```{r}
+summary(ryegrass.LL4)
+```
+
+e = ED50
+
+c = lowerlimit
+d = upper limit
+b = proportional to the slope
+
+confidence intervals
+
+```{r}
+confint(ryegrass.LL4)
+```
+
+##plot with confidence bands
+
+```{r}
+plot(ryegrass.LL4, broken = TRUE, type="confidence")
+```
+
+errors due to version?
+
+
+##getting other ED values
+
+```{r}
+ED(ryegrass.LL4, c(10,20,50,90), interval="delta")
+
+```
+
+
+
+
+
+#trying to plot own data
+
+```{r}
+elispot <- read.csv(file.choose())
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

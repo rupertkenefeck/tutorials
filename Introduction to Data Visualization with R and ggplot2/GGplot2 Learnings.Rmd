@@ -289,3 +289,6 @@ ggplot(titanic, aes(x = Age, fill = Survived)) +
        title = "Titanic Survival Rates by Age, Pclass and Sex")
 ```
 
+
+
+
