@@ -1,0 +1,291 @@
+---
+title: "Notes on GGplot2"
+author: "Rupert"
+date: "23 February 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#
+#
+##The Grammar
+### Data
+### layers - points lines etc
+### scales - mapping to the graphical output
+### coordinates - perspective (the grid)
+### faceting - visual drill down (subsetting) into the data (pivot table like)
+### themes - details of the disply (fonts)
+#
+#
+##What you actually need 80% of the time
+###Data
+### Asthetic  (aes) mappings for the visualisation - passenger information mapping to y axis
+###layers - at least one to render the data (ggplot geom function) ege a simple scatter plot
+
+
+
+
+```{r}
+#install.packages("ggplot2")
+#install.packages("dplyr")
+#library(dplyr)
+library(ggplot2)
+```
+
+#
+### Load Data
+
+Factors are going to be important for ggplot2's calculations (https://www.stat.berkeley.edu/~s133/factors.html)
+
+```{r}
+
+titanic <- read.csv("titanic.csv", stringsAsFactors = FALSE)
+View(titanic)
+
+```
+
+```{r}
+titanic$Pclass <- as.factor(titanic$Pclass)
+titanic$Survived <- as.factor(titanic$Survived)
+titanic$Sex <- as.factor(titanic$Sex)
+titanic$Embarked <- as.factor(titanic$Embarked)
+
+#converted to factors because these are catagories and not used for calculation - ggplot2 is smart and will use these for colour coding etc
+```
+
+#plotting
+##First question - What was the survival rate? 
+
+```{r}
+
+#
+# We'll start our visual analysis of the data focusing on questions
+# related to survival rates. Specifically, these questions will use
+# the factor (i.e., categorical) variables in the data. Factor data
+# is very common in the business context and ggplot2 offers many
+# powerful features for visualizing factor data.
+#
+
+
+#
+# First question - What was the survival rate? 
+#
+# As Survived is a factor (i.e., categorical) variable, a bar chart 
+# is a great visualization to use.
+#
+
+ggplot(titanic, aes(x = Survived)) + 
+  geom_bar()
+
+# If you really want percentages.
+prop.table(table(titanic$Survived))
+
+```
+
+##Nicer graphics - Themes
+
+```{r}
+# Add some customization for labels and theme.
+ggplot(titanic, aes(x = Survived)) + 
+  theme_bw() +
+  geom_bar() +
+  labs(y = "Passenger Count",
+       title = "Titanic Survival Rates")
+```
+
+
+#
+## Second question - What was the survival rate by gender? 
+#
+ We can use color to look at two aspects (i.e., dimensions)
+ of the data simultaneously.
+
+
+
+#using fill - filled proportional to 'survived'
+
+
+```{r}
+ggplot(titanic, aes(x = Sex, fill = Survived)) + 
+  theme_bw() +
+  geom_bar() +
+  labs(y = "Passenger Count",
+       title = "Titanic Survival Rates by Sex")
+```
+
+
+
+#
+## Third question - What was the survival rate by class of ticket? 
+#
+
+
+
+```{r}
+ggplot(titanic, aes(x = Pclass, fill = Survived)) + 
+  theme_bw() +
+  geom_bar() +
+  labs(y = "Passenger Count",
+       x = "Class of Ticket",
+       title = "Titanic Survival Rates by Pclass")
+```
+
+
+
+#facetting
+
+## Fourth question - What was the survival rate by class of ticket and gender?
+
+We can leverage facets to further segment the data and enable
+ "visual drill-down" into the data.
+ 
+## ~ (surogate of by) 
+
+```{r}
+#
+ggplot(titanic, aes(x = Sex, fill = Survived)) + 
+  theme_bw() +
+  facet_wrap(~ Pclass) +
+  geom_bar() +
+  labs(y = "Passenger Count",
+       title = "Titanic Survival Rates by Pclass and Sex")
+```
+
+#Continuous Data
+
+ Next, we'll move on to visualizing continuous (i.e., numeric)
+ data using ggplot2. We'll explore visualizations of single 
+ numeric variables (i.e., columns) and also illustrate how
+ ggplot2 enables visual drill-down on numeric data.
+
+## Fifth Question - What is the distribution of passenger ages?
+ The histogram is a staple of visualizing numeric data as it very 
+ powerfully communicates the distrubtion of a variable (i.e., column).
+ 
+ 177 values do not have data
+ 
+```{r}
+ggplot(titanic, aes(x = Age)) +
+  theme_bw() +
+  geom_histogram(binwidth = 5) +
+  labs(y = "Passenger Count",
+       x = "Age (binwidth = 5)",
+       title = "Titanic Age Distribtion")
+```
+ 
+#
+## Sixth Question - What are the survival rates by age?
+#
+```{r}
+ggplot(titanic, aes(x = Age, fill = Survived)) +
+  theme_bw() +
+  geom_histogram(binwidth = 5) +
+  labs(y = "Passenger Count",
+       x = "Age (binwidth = 5)",
+       title = "Titanic Survival Rates by Age")
+```
+
+## Another great visualization for this question is the box-and-whisker plot.
+```{r}
+ggplot(titanic, aes(x = Survived, y = Age)) +
+  theme_bw() +
+  geom_boxplot() +
+  labs(y = "Age",
+       x = "Survived",
+       title = "Titanic Survival Rates by Age")
+```
+
+
+### Some help on violins
+
+http://www.sthda.com/english/wiki/ggplot2-violin-plot-quick-start-guide-r-software-and-data-visualization
+
+```{r}
+library(RColorBrewer)
+display.brewer.all(colorblindFriendly = TRUE)
+```
+
+
+```{r}
+
+ggplot(titanic, aes(x = Survived, y = Age, fill = Survived,)) +
+  theme_bw() +
+   geom_violin(scale = "count",trim=FALSE) +
+  #scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  #scale_color_brewer(palette="Dark2") +
+ 
+  scale_fill_brewer(palette="Paired") +
+  facet_grid(~ Sex ~ Pclass) +
+  
+  geom_boxplot(width = 0.2, fill = "slateblue") +
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=0.2)
+  #geom_jitter(col = "black", pch = 18, width = 0.15) +
+  #stat_summary(fun.y=median, geom="point", size=2, color="red") +
+  
+  labs(y = "Age",
+       x = "Survived",
+       title = "Titanic Survival Rates by Age")
+
+
+
+
+```
+
+```{r}
+pdf("myLittlePlot.pdf")    
+#png("plots.png", width = 3000, height = 2000, units = "px", pointsize = 200,)                    
+
+
+ggplot(titanic, aes(x = Survived, y = Age, fill = Survived, )) +
+  theme_bw() +
+   geom_violin(scale = "count",trim=FALSE) +
+  #scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))+
+  #scale_color_brewer(palette="Dark2") +
+ 
+  scale_fill_brewer(palette="Paired") +
+  facet_grid(~ Sex ~ Pclass) +
+    
+  geom_boxplot(width = 0.2, fill = "slateblue") +
+  
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=0.2)
+  #geom_jitter(col = "black", pch = 18, width = 0.15) +
+  #stat_summary(fun.y=median, geom="point", size=2, color="red") +
+  
+  labs(y = "Age",
+       x = "Survived",
+       title = "Titanic Survival Rates by Age")
+
+dev.off()
+```
+
+
+
+
+```{r}
+ggplot(titanic, aes(x = Survived, y = Age, fill = Pclass)) +
+  theme_bw() +
+  geom_violin() +
+  labs(y = "Age",
+       x = "Survived",
+       title = "Titanic Survival Rates by Age")
+```
+
+
+## Seventh Question - What is the survival rates by age when segmented by gender and class of ticket?
+
+ A related visualization to the histogram is a density plot. Think of
+ a density plot as a smoothed version of the histogram. Using ggplot2
+ we can use facets to allow for visual drill-down via density plots.
+
+```{r}
+ggplot(titanic, aes(x = Age, fill = Survived)) +
+  theme_bw() +
+  facet_wrap(Sex ~ Pclass) +
+  geom_density(alpha = 0.5) +
+  labs(y = "Survived",
+       x = "Age",
+       title = "Titanic Survival Rates by Age, Pclass and Sex")
+```
+

@@ -29,7 +29,7 @@ titanic <- read.csv("titanic.csv", stringsAsFactors = FALSE)
 View(titanic)
 
 
-# Set up factors.
+# Set up factors.stringsAsFactors = FALSE
 titanic$Pclass <- as.factor(titanic$Pclass)
 titanic$Survived <- as.factor(titanic$Survived)
 titanic$Sex <- as.factor(titanic$Sex)
